@@ -690,7 +690,7 @@ function getCiteText(a) {
   const title = (a.title || '').replace(/<[^>]+>/g, '');
   const volIssue = (a.volume || a.issue) ? `${a.volume||''}(${a.issue||''})` : '';
   const pages = (a.firstpage && a.lastpage) ? `${a.firstpage}-${a.lastpage}` : (a.firstpage ? `${a.firstpage}` : '');
-  const doiUrl = `https://www.sciopen.com/article/${a.doi || ''}`;
+  const doiUrl = `https://doi.org/${a.doi || ''}`;
   return `${authorStr}. ${title}. Food &amp; Medicine Homology, ${year}, ${volIssue}: ${pages}. ${doiUrl}`;
 }
 
