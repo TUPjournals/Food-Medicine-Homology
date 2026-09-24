@@ -629,7 +629,7 @@ function render() {
       <div class="card-authors">${shortNames}</div>
       ${kws ? `<div class="card-keywords">${kws}</div>` : ''}
       ${(a.research_area||[]).length > 0 ? `<div class="card-keywords"><span style="font-size:0.78rem;color:#666;margin-right:4px;font-weight:600">Research area:</span>${a.research_area.map(ar => `<span class="kw" style="background:#fff3e0;color:#e65100;font-weight:600">${esc(ar)}</span>`).join(' ')}</div>` : ''}
-      ${a.doi ? `<div class="card-doi"><a href="https://www.sciopen.com/article/${a.doi}" target="_blank" onclick="event.stopPropagation()">https://www.sciopen.com/article/${esc(a.doi)}</a></div>` : ''}
+      ${a.doi ? `<div class="card-doi"><a href="https://doi.org/${a.doi}" target="_blank" onclick="event.stopPropagation()">https://doi.org/${esc(a.doi)}</a></div>` : ''}
       ${a.doi ? `
       <div class="card-cite" onclick="event.stopPropagation()">
         <span class="card-cite-text">${getCiteText(a)}</span>
@@ -646,7 +646,6 @@ function render() {
         </div>
         ${a.abstract ? `<div class="d-abstract"><strong>Abstract:</strong> ${highlight(a.abstract.replace(/<[^>]+>/g, ''), currentQuery)}</div>` : ''}
         <div class="d-links">
-          ${a.doi ? `<a href="https://www.sciopen.com/article/${a.doi}" target="_blank" onclick="event.stopPropagation()">View on SciOpen →</a>` : ''}
           ${a.pdf_springer ? `<a href="${a.pdf_springer}" target="_blank" onclick="event.stopPropagation()">Download PDF (Springer) →</a>` : ''}
         </div>
       </div>
@@ -759,7 +758,7 @@ function downloadRIS(idx) {
   if (a.volume) ris.push('VL  - ' + a.volume);
   if (a.issue) ris.push('IS  - ' + a.issue);
   if (a.abstract) ris.push('AB  - ' + a.abstract.replace(/<[^>]+>/g, '').replace(/\\u([0-9a-fA-F]{4})/g, (_, h) => String.fromCharCode(parseInt(h, 16))).replace(/\\\//g,'/').replace(/\\\\/g,'\\').replace(/\s+/g,' ').trim());
-  if (a.doi) ris.push('UR  - https://www.sciopen.com/article/' + a.doi);
+  if (a.doi) ris.push('UR  - https://doi.org/' + a.doi);
   if (a.doi) ris.push('DO  - ' + a.doi);
   const fn = (a.doi||'FMH').replace(/[/\\]/g,'_') + '.ris';
   download(ris.join('\r\n') + '\r\n', fn, 'application/x-research-info-systems;charset=utf-8;');
@@ -803,7 +802,7 @@ function generateBibTeX(a) {
   else if (a.firstpage) bib += '  articleno = {' + a.firstpage + '},\n';
   if (a.doi) {
     bib += '  doi = {' + a.doi + '},\n';
-    bib += '  url = {https://www.sciopen.com/article/' + a.doi + '},\n';
+    bib += '  url = {https://doi.org/' + a.doi + '},\n';
   }
   if (a.keywords && a.keywords.length) bib += '  keywords = {' + a.keywords.join(', ') + '},\n';
   bib += '}';
