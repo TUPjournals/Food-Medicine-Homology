@@ -615,13 +615,13 @@ function render() {
       return `<span style="display:inline-block;white-space:nowrap">${esc(name)}</span>`;
     });
     const shortNames = formattedAuthors.join(', ');
-    const kws = (a.keywords||[]).slice(0,5).map(k => `<span class="kw">${highlight(k.replace(/<[^>]+>/g, ''), currentQuery)}</span>`).join('');
+    const kws = (a.keywords||[]).slice(0,5).map(k => `<span class="kw">${highlight(k.replace(FMT_TAG_RE, ''), currentQuery)}</span>`).join('');
     const volIssue = (a.volume || a.issue) ? `Vol.${a.volume||'?'} Iss. ${a.issue||'?'}` : '';
 
     return `
     <div class="card" data-idx="${i}">
       <div class="card-head" onclick="toggle(this.parentElement)">
-        <div class="card-title">${highlight(a.title.replace(/<[^>]+>/g, ''), currentQuery)}</div>
+        <div class="card-title">${highlight(a.title.replace(FMT_TAG_RE, ''), currentQuery)}</div>
         <div class="badges">
           <span class="badge-year">${a.year || '?'}</span>
           ${a.type ? `<span class="badge-type">${esc(a.type)}</span>` : ''}
@@ -647,7 +647,7 @@ function render() {
           ${a.firstpage ? `<div class="d-item"><label>${a.lastpage ? 'Pages' : 'Article number'}</label><span>${a.firstpage}${a.lastpage ? '-' + a.lastpage : ''}</span></div>` : ''}
           ${a.publication_date ? `<div class="d-item"><label>Published</label><span>${esc(a.publication_date)}</span></div>` : ''}
         </div>
-        ${a.abstract ? `<div class="d-abstract"><strong>Abstract:</strong> ${highlight(a.abstract.replace(/<[^>]+>/g, ''), currentQuery)}</div>` : ''}
+        ${a.abstract ? `<div class="d-abstract"><strong>Abstract:</strong> ${highlight(a.abstract.replace(FMT_TAG_RE, ''), currentQuery)}</div>` : ''}
         <div class="d-links">
           ${a.pdf_springer ? `<a href="${a.pdf_springer}" target="_blank" onclick="event.stopPropagation()">Download PDF (Springer) →</a>` : ''}
         </div>
@@ -690,7 +690,7 @@ function getCiteText(a) {
     authorStr = aus.join(', ');
   }
   const year = a.year || '';
-  const title = (a.title || '').replace(/<[^>]+>/g, '');
+  const title = (a.title || '').replace(FMT_TAG_RE, '');
   const volIssue = (a.volume || a.issue) ? `${a.volume||''}(${a.issue||''})` : '';
   const pages = (a.firstpage && a.lastpage) ? `${a.firstpage}-${a.lastpage}` : (a.firstpage ? `${a.firstpage}` : '');
   const doiUrl = `https://doi.org/${a.doi || ''}`;
@@ -753,14 +753,14 @@ function downloadRIS(idx) {
     }
   });
   if (a.year) ris.push('PY  - ' + a.year);
-  ris.push('TI  - ' + (a.title||'').replace(/<[^>]+>/g, ''));
+  ris.push('TI  - ' + (a.title||'').replace(FMT_TAG_RE, ''));
   ris.push('JO  - Food &amp; Medicine Homology');
   ris.push('SN  - 3006-6867');
   if (a.firstpage) ris.push('SP  - ' + a.firstpage);
   if (a.firstpage && !a.lastpage) {} else if (a.lastpage) ris.push('EP  - ' + a.lastpage);
   if (a.volume) ris.push('VL  - ' + a.volume);
   if (a.issue) ris.push('IS  - ' + a.issue);
-  if (a.abstract) ris.push('AB  - ' + a.abstract.replace(/<[^>]+>/g, '').replace(/\\u([0-9a-fA-F]{4})/g, (_, h) => String.fromCharCode(parseInt(h, 16))).replace(/\\\//g,'/').replace(/\\\\/g,'\\').replace(/\s+/g,' ').trim());
+  if (a.abstract) ris.push('AB  - ' + a.abstract.replace(FMT_TAG_RE, '').replace(/\\u([0-9a-fA-F]{4})/g, (_, h) => String.fromCharCode(parseInt(h, 16))).replace(/\\\//g,'/').replace(/\\\\/g,'\\').replace(/\s+/g,' ').trim());
   if (a.doi) ris.push('UR  - https://doi.org/' + a.doi);
   if (a.doi) ris.push('DO  - ' + a.doi);
   const fn = (a.doi||'FMH').replace(/[/\\]/g,'_') + '.ris';
@@ -813,6 +813,11 @@ function generateBibTeX(a) {
 }
 
 /* ── Escape ── */
+/* ── Strip ── */
+/* Remove only known inline formatting tags; a generic /<[^>]+>/ would also
+   delete real text such as "<Height, Width, Channel>" in decoded abstracts. */
+const FMT_TAG_RE = /<\/?(?:i|b|em|strong|sup|sub|span|small|mark|u|s|strike|tt|code|math|mi|mn|mo|mtext|msub|msup|mrow)\b[^>]*\/?>/gi;
+
 function esc(s) {
   if (!s) return '';
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
